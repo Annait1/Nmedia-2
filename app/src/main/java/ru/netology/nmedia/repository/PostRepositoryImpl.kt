@@ -48,17 +48,14 @@ class PostRepositoryImpl : PostRepository {
         val request = requestBuilder.build()
 
 
-        client.newCall(request)
-            .execute()
-            .close()
-
 
         val response = client.newCall(request).execute()
-        val body = response.body?.string() ?: throw RuntimeException("body is null")
-        response.close()
-        return gson.fromJson(body, Post::class.java)
 
+        response.use {
+            val body = response.body?.string() ?: throw RuntimeException("body is null")
+            return gson.fromJson(body, Post::class.java)
 
+        }
     }
 
     override fun save(post: Post) {

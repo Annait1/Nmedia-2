@@ -29,6 +29,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     val postCreated: LiveData<Unit>
         get() = _postCreated
 
+
     init {
         loadPosts()
     }
@@ -71,9 +72,20 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun likeById(id: Long, likedByMe: Boolean) {
-        thread { repository.likeById(id, likedByMe) }
-        loadPosts()
+        thread {
+            try {
+                val updatedPost = repository.likeById(id, likedByMe)
 
+                val current = _data.value ?: FeedModel()
+                val updatedList = current.posts.map { post ->
+                    if (post.id == updatedPost.id) updatedPost else post
+                }
+
+                _data.postValue(current.copy(posts = updatedList))
+            } catch (e: IOException) {
+                _data.postValue((_data.value ?: FeedModel()).copy(error = true))
+            }
+        }
     }
 
     fun removeById(id: Long) {
@@ -81,8 +93,9 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             // Оптимистичная модель
             val old = _data.value?.posts.orEmpty()
             _data.postValue(
-                _data.value?.copy(posts = _data.value?.posts.orEmpty()
-                    .filter { it.id != id }
+                _data.value?.copy(
+                    posts = _data.value?.posts.orEmpty()
+                        .filter { it.id != id }
                 )
             )
             try {
