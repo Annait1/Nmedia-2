@@ -6,9 +6,12 @@ import android.widget.PopupMenu
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
+import android.view.View
+import ru.netology.nmedia.dto.AttachmentType
 
 interface OnInteractionListener {
     fun onLike(post: Post) {}
@@ -45,6 +48,51 @@ class PostViewHolder(
             like.isChecked = post.likedByMe
             like.text = "${post.likes}"
 
+            /*   val baseUrl = "http://10.0.2.2:9999"*/
+            /*   val avatarUrl = */
+
+
+            /*  Glide.with(avatar)
+                  .load(avatarUrl)
+
+                  .into(avatar)
+
+              println("avatarUrl=$avatarUrl")*/
+
+            val url = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
+
+            Glide.with(avatar)
+                .load(url)
+                .placeholder(R.drawable.ic_loading)
+                .error(R.drawable.ic_error)
+                .timeout(10_000)
+                .circleCrop()
+                .into(avatar)
+
+
+
+
+
+            if (post.attachment != null && post.attachment.type == AttachmentType.IMAGE) {
+
+                attachmentImage.visibility = View.VISIBLE
+
+                val url = "http://10.0.2.2:9999/images/${post.attachment.url}"
+
+                Glide.with(attachmentImage)
+                    .load(url)
+                    .placeholder(R.drawable.ic_loading)
+                    .error(R.drawable.ic_error)
+                    .timeout(10_000)
+                    .into(attachmentImage)
+
+            } else {
+                attachmentImage.visibility = View.GONE
+                Glide.with(attachmentImage).clear(attachmentImage)
+            }
+
+
+
             menu.setOnClickListener {
                 PopupMenu(it.context, it).apply {
                     inflate(R.menu.options_post)
@@ -54,6 +102,7 @@ class PostViewHolder(
                                 onInteractionListener.onRemove(post)
                                 true
                             }
+
                             R.id.edit -> {
                                 onInteractionListener.onEdit(post)
                                 true
@@ -72,6 +121,8 @@ class PostViewHolder(
             share.setOnClickListener {
                 onInteractionListener.onShare(post)
             }
+
+
         }
     }
 }

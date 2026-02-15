@@ -58,6 +58,7 @@ dependencies {
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.room)
+    implementation(libs.play.services.fido)
     ksp(libs.androidx.room.compiler)
     implementation(platform(libs.firebase))
     implementation(libs.firebase.messaging)
@@ -66,4 +67,5 @@ dependencies {
     coreLibraryDesugaring(libs.desugaring)
    /* implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0-alpha01")*/
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 }
