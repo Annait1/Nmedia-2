@@ -20,7 +20,7 @@ import ru.netology.nmedia.viewmodel.PostViewModel
 class FeedFragment : Fragment() {
 
     private val viewModel: PostViewModel by activityViewModels()
-    private var errorShown = false
+    /*private var errorShown = false*/
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -54,26 +54,41 @@ class FeedFragment : Fragment() {
                 startActivity(shareIntent)
             }
         })
+
+
         binding.list.adapter = adapter
         viewModel.data.observe(viewLifecycleOwner) { state ->
             adapter.submitList(state.posts)
-            binding.progress.isVisible = state.loading
-            binding.errorGroup.isVisible = state.error
+
             binding.emptyText.isVisible = state.empty
-            binding.swipe.isRefreshing = false
+            binding.resresh.isRefreshing = false
 
-            if (state.error && !errorShown) {
-                errorShown = true
-                showErrorSnackbar(binding.root)
+
+        }
+
+        viewModel.state.observe(viewLifecycleOwner) {state ->
+            binding.progress.isVisible = state.loading
+          /*  binding.errorGroup.isVisible = state.error уже не надо*/
+            binding.resresh.isRefreshing = state.refreshing
+
+            if (state.error) {
+                Snackbar.make(
+                    binding.root,
+                    state.errorMessage ?: R.string.error_loading,
+                    Snackbar.LENGTH_LONG
+                )
+                    .setAction(R.string.retry_loading) { viewModel.loadPosts() }
+                    .show()
             }
+
         }
 
-        binding.retryButton.setOnClickListener {
+       /* binding.retryButton.setOnClickListener {
             viewModel.loadPosts()
-        }
+        }уже не надо. в layout удалили**/
 
-        binding.swipe.setOnRefreshListener {
-            viewModel.loadPosts()
+        binding.resresh.setOnRefreshListener {
+            viewModel.refreshPosts()
         }
 
         binding.fab.setOnClickListener {
@@ -82,10 +97,11 @@ class FeedFragment : Fragment() {
 
         return binding.root
     }
-
-    private fun showErrorSnackbar(root: View) {
-        Snackbar.make(root, "Ошибка загрузки", Snackbar.LENGTH_INDEFINITE)
-            .setAction("Повторить") { viewModel.loadPosts() }
-            .show()
-    }
 }
+
+/*    private fun showErrorSnackbar(root: View) {
+        Snackbar.make(root, R.string.error_loading, Snackbar.LENGTH_INDEFINITE)
+            .setAction(R.string.retry) { viewModel.loadPosts() }
+            .show()
+    }поменяла как в лекции*/
+

@@ -20,4 +20,7 @@
     <string name="notification_user_liked">User %1$s liked %2$s\'s post</string>
     <string name="channel_remote_name">Server notifications</string>
     <string name="channel_remote_description">Notifications from remote server</string>
+    <string name="error_network">No internet connection</string>
+    <string name="error_server">Server error</string>
+    <string name="error_unknown">Something went wrong</string>
 </resources>
