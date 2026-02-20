@@ -2,6 +2,9 @@ package ru.netology.nmedia.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.R
 import ru.netology.nmedia.db.AppDb
@@ -14,6 +17,7 @@ import ru.netology.nmedia.repository.*
 import ru.netology.nmedia.util.SingleLiveEvent
 import java.io.IOException
 import kotlin.concurrent.thread
+
 
 private val empty = Post(
     id = 0,
@@ -29,13 +33,25 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: PostRepository = PostRepositoryImpl(
         AppDb.getInstance(context = application).postDao()
     )
+
+    val data: LiveData<FeedModel> = repository.data.map {
+        FeedModel(
+            it, it.isEmpty()
+        )
+    }
+        .catch { it.printStackTrace() }
+        .asLiveData((Dispatchers.Default))
+
+    val newerCount: LiveData<Int> =
+        repository.getNewerCount(0L)
+            .catch { _state.postValue(FeedModelState(error = true)) }
+            .asLiveData(Dispatchers.Default)
+
     private val _state = MutableLiveData(FeedModelState())
     val state: LiveData<FeedModelState>
         get() = _state
 
-    val data: LiveData<FeedModel> = repository.data.map {
-        FeedModel(posts = it, empty = it.isEmpty())
-    }
+
     val edited = MutableLiveData(empty)
     private val _postCreated = SingleLiveEvent<Unit>()
     val postCreated: LiveData<Unit>
@@ -62,7 +78,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     fun refreshPosts() {
         viewModelScope.launch {
-            _state.value = FeedModelState(refreshing= true)
+            _state.value = FeedModelState(refreshing = true)
             _state.value = try {
                 repository.getAll()
                 FeedModelState()
@@ -124,6 +140,9 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         }
 
     }
+    fun showNewPosts() = viewModelScope.launch {
+        repository.showNewPosts()
+    }
 
     private fun errorMessage(e: Throwable): Int = when (e) {
         is NetworkError -> R.string.error_network
@@ -132,6 +151,8 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         else -> R.string.error_unknown
 
     }
+
+
 }
 
 

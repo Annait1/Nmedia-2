@@ -23,4 +23,11 @@
     <string name="error_network">No internet connection</string>
     <string name="error_server">Server error</string>
     <string name="error_unknown">Something went wrong</string>
+    <string name="show_new">Show_new</string>
+
+
+    <plurals name="new_posts">
+        <item quantity="one">Show %d new post</item>
+        <item quantity="other">Show %d new posts</item>
+    </plurals>
 </resources>

@@ -24,4 +24,14 @@
     <string name="error_network">Нет сети</string>
     <string name="error_server">Ошибка сервера</string>
     <string name="error_unknown">Что-то пошло не так</string>
+    <string name="show_new">Показать новые</string>
+
+
+
+    <plurals name="new_posts">
+        <item quantity="one">Показать %d новый пост</item>
+        <item quantity="few">Показать %d новых поста</item>
+        <item quantity="many">Показать %d новых постов</item>
+        <item quantity="other">Показать %d новых постов</item>
+    </plurals>
 </resources>

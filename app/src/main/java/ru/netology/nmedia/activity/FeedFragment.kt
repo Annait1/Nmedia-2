@@ -62,13 +62,17 @@ class FeedFragment : Fragment() {
 
             binding.emptyText.isVisible = state.empty
             binding.resresh.isRefreshing = false
-
-
         }
 
-        viewModel.state.observe(viewLifecycleOwner) {state ->
+        binding.newPostsCard.setOnClickListener {
+            binding.newPostsCard.isVisible = false
+            viewModel.showNewPosts()
+            binding.list.smoothScrollToPosition(0)
+        }
+
+        viewModel.state.observe(viewLifecycleOwner) { state ->
             binding.progress.isVisible = state.loading
-          /*  binding.errorGroup.isVisible = state.error уже не надо*/
+            /*  binding.errorGroup.isVisible = state.error уже не надо*/
             binding.resresh.isRefreshing = state.refreshing
 
             if (state.error) {
@@ -83,9 +87,15 @@ class FeedFragment : Fragment() {
 
         }
 
-       /* binding.retryButton.setOnClickListener {
-            viewModel.loadPosts()
-        }уже не надо. в layout удалили**/
+        viewModel.newerCount.observe(viewLifecycleOwner) { count ->
+            binding.newPostsCard.isVisible = count > 0
+            if (count > 0) {
+                binding.newPostsText.text =
+                    resources.getQuantityString(
+                        R.plurals.new_posts, count, count
+                    )
+            }
+        }
 
         binding.resresh.setOnRefreshListener {
             viewModel.refreshPosts()
