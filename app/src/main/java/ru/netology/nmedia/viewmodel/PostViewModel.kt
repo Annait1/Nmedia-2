@@ -19,7 +19,7 @@ private val empty = Post(
 )
 
 class PostViewModel(application: Application) : AndroidViewModel(application) {
-    // упрощённый вариант
+
     private val repository: PostRepository = PostRepositoryImpl()
     private val _data = MutableLiveData(FeedModel())
     val data: LiveData<FeedModel>
@@ -53,11 +53,11 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         _data.value = FeedModel(loading = true)
         repository.getAllAsync(object : PostRepository.GetAllCallback {
             override fun onSuccess(posts: List<Post>) {
-                _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
+                _data.value = FeedModel(posts = posts, empty = posts.isEmpty())
             }
 
-            override fun onError(e: Exception) {
-                _data.postValue(FeedModel(error = true))
+            override fun onError(e: Throwable) {
+                _data.value = FeedModel(error = true)
             }
         })
     }
@@ -66,10 +66,10 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         edited.value?.let { post ->
             repository.saveAsync(post, object : PostRepository.SaveCallback {
                 override fun onSuccess() {
-                    _postCreated.postValue(Unit)
+                    _postCreated.value = Unit
                 }
 
-                override fun onError(e: Exception) {
+                override fun onError(e: Throwable) {
                     _data.postValue((_data.value ?: FeedModel()).copy(error = true))
                 }
             })
@@ -98,7 +98,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                 _data.postValue(current.copy(posts = updatedList))
             }
 
-            override fun onError(e: Exception) {
+            override fun onError(e: Throwable) {
                 _data.postValue((_data.value ?: FeedModel()).copy(error = true))
             }
         })
@@ -106,25 +106,22 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     fun removeById(id: Long) {
 
-            // Оптимистичная модель
-            val old = _data.value?.posts.orEmpty()
-            _data.postValue(
-                _data.value?.copy(
-                    posts = _data.value?.posts.orEmpty()
-                        .filter { it.id != id }
-                )
-            )
-            repository.removeByIdAsync(id, object : PostRepository.RemoveCallback {
-                override fun onSuccess() {
-                    // ничего
-                }
+        val old = _data.value?.posts.orEmpty()
+        _data.value =
+            (_data.value?: FeedModel()).copy(posts = old.filter { it.id != id }
+        )
 
-                override fun onError(e: Exception) {
-                    _data.postValue(_data.value?.copy(posts = old))
-                }
-            })
-        }
+        repository.removeByIdAsync(id, object : PostRepository.RemoveCallback {
+            override fun onSuccess() {
 
+            }
+
+            override fun onError(e: Throwable) {
+                _data.value = (_data.value ?: FeedModel()).copy(posts = old)
+            }
+        })
     }
+
+}
 
 

@@ -9,6 +9,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
@@ -19,6 +20,7 @@ import ru.netology.nmedia.viewmodel.PostViewModel
 class FeedFragment : Fragment() {
 
     private val viewModel: PostViewModel by activityViewModels()
+    private var errorShown = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -31,7 +33,7 @@ class FeedFragment : Fragment() {
             override fun onEdit(post: Post) {
                 viewModel.edit(post)
             }
-//тут
+
             override fun onLike(post: Post) {
                 viewModel.likeById(post.id, post.likedByMe)
             }
@@ -59,6 +61,11 @@ class FeedFragment : Fragment() {
             binding.errorGroup.isVisible = state.error
             binding.emptyText.isVisible = state.empty
             binding.swipe.isRefreshing = false
+
+            if (state.error && !errorShown) {
+                errorShown = true
+                showErrorSnackbar(binding.root)
+            }
         }
 
         binding.retryButton.setOnClickListener {
@@ -74,5 +81,11 @@ class FeedFragment : Fragment() {
         }
 
         return binding.root
+    }
+
+    private fun showErrorSnackbar(root: View) {
+        Snackbar.make(root, "Ошибка загрузки", Snackbar.LENGTH_INDEFINITE)
+            .setAction("Повторить") { viewModel.loadPosts() }
+            .show()
     }
 }
