@@ -12,6 +12,7 @@ import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
 import android.view.View
 import ru.netology.nmedia.dto.AttachmentType
+import ru.netology.nmedia.util.formatRelativeTime
 
 interface OnInteractionListener {
     fun onLike(post: Post) {}
@@ -42,7 +43,7 @@ class PostViewHolder(
     fun bind(post: Post) {
         binding.apply {
             author.text = post.author
-            published.text = post.published
+            published.text = formatRelativeTime(post.published)
             content.text = post.content
             // в адаптере
             like.isChecked = post.likedByMe
