@@ -16,12 +16,14 @@ import java.io.IOException
 import kotlin.concurrent.thread
 
 private val empty = Post(
-    id = 0,
+    id = 0L,
     content = "",
     author = "",
     likedByMe = false,
     likes = 0,
-    published = ""
+    published = 0L,
+    attachment = null,
+    authorAvatar = ""
 )
 
 class PostViewModel(application: Application) : AndroidViewModel(application) {
@@ -77,6 +79,14 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             _state.value = try {
                 edited.value?.let { post ->
+                    val toSend = post.copy(
+                        author = "",
+                        published = 0L,
+                        likes = 0,
+                        likedByMe = false,
+                        attachment = null,
+                        authorAvatar = null
+                    )
                     repository.save(post)
                     _postCreated.value = Unit
                 }
