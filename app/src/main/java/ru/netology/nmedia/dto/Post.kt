@@ -6,10 +6,10 @@ data class Post(
     val id: Long,
     val author: String,
     val content: String,
-    val published: String,
+    val published: Long,
     val likedByMe: Boolean,
     val likes: Int = 0,
-    val authorAvatar: String? = null,
+    val authorAvatar: String? = "",
     val attachment: Attachment? = null
 )
 data class Attachment(
@@ -21,3 +21,5 @@ data class Attachment(
 enum class AttachmentType {
     IMAGE
 }
+
+

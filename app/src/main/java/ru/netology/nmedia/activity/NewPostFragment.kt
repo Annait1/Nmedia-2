@@ -11,6 +11,8 @@ import ru.netology.nmedia.databinding.FragmentNewPostBinding
 import ru.netology.nmedia.util.AndroidUtils
 import ru.netology.nmedia.util.StringArg
 import ru.netology.nmedia.viewmodel.PostViewModel
+import com.google.android.material.snackbar.Snackbar
+import ru.netology.nmedia.R
 
 class NewPostFragment : Fragment() {
 
@@ -43,6 +45,19 @@ class NewPostFragment : Fragment() {
             viewModel.loadPosts()
             findNavController().navigateUp()
         }
+
+        viewModel.state.observe(viewLifecycleOwner) { state ->
+            if (state.error) {
+                Snackbar.make(
+                    binding.root,
+                    state.errorMessage ?: R.string.error_loading,
+                    Snackbar.LENGTH_LONG
+                )
+                    .setAction(R.string.retry_loading) { viewModel.save() }
+                    .show()
+            }
+        }
+
         return binding.root
     }
 }
