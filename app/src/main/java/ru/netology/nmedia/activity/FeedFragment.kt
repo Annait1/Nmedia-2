@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -52,6 +53,16 @@ class FeedFragment : Fragment() {
                 val shareIntent =
                     Intent.createChooser(intent, getString(R.string.chooser_share_post))
                 startActivity(shareIntent)
+            }
+
+            override fun onImage(post: Post) {
+                val fileName = post.attachment?.url ?: return
+                val fullUrl = "http://10.0.2.2:9999/media/$fileName"
+
+                findNavController().navigate(
+                    R.id.action_feedFragment_to_imageFragment,
+                    bundleOf("url" to fullUrl)
+                )
             }
         })
 
@@ -109,9 +120,4 @@ class FeedFragment : Fragment() {
     }
 }
 
-/*    private fun showErrorSnackbar(root: View) {
-        Snackbar.make(root, R.string.error_loading, Snackbar.LENGTH_INDEFINITE)
-            .setAction(R.string.retry) { viewModel.loadPosts() }
-            .show()
-    }поменяла как в лекции*/
 

@@ -24,6 +24,8 @@
     <string name="error_server">Server error</string>
     <string name="error_unknown">Something went wrong</string>
     <string name="show_new">Show_new</string>
+    <string name="imagepickererror">ImagePickerError</string>
+    <string name="image">Image attachment</string>
 
 
     <plurals name="new_posts">

@@ -25,7 +25,8 @@
     <string name="error_server">Ошибка сервера</string>
     <string name="error_unknown">Что-то пошло не так</string>
     <string name="show_new">Показать новые</string>
-
+    <string name="imagepickererror">ImagePickerError</string>
+    <string name="image">Картинка поста</string>
 
 
     <plurals name="new_posts">

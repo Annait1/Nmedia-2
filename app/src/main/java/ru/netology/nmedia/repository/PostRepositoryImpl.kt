@@ -11,13 +11,19 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
 import ru.netology.nmedia.api.PostApi
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.dao.PostDao
+import ru.netology.nmedia.dto.Attachment
+import ru.netology.nmedia.dto.AttachmentType
+import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.entity.toEntity
 import ru.netology.nmedia.error.AppError
+import java.io.File
 
 
 class PostRepositoryImpl(private val postDao: PostDao) : PostRepository {
@@ -68,9 +74,19 @@ class PostRepositoryImpl(private val postDao: PostDao) : PostRepository {
     }
 
 
-    override suspend fun save(post: Post): Post {
+    override suspend fun save(post: Post, image: File?): Post {
         try {
-            val response = PostApi.service.save(post)
+
+            val media = image?.let {
+                upload(it)
+            }
+
+            val postWithAttachment = media?.let {
+                post.copy(attachment = Attachment(url = it.id, AttachmentType.IMAGE))
+            }?: post
+
+
+            val response = PostApi.service.save(postWithAttachment)
 
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
@@ -86,6 +102,15 @@ class PostRepositoryImpl(private val postDao: PostDao) : PostRepository {
             throw AppError.from(e)
         }
     }
+
+    private suspend fun upload(file: File): Media =
+        PostApi.service.upload(
+            MultipartBody.Part.createFormData(
+                "file",
+                file.name,
+                file.asRequestBody()
+            )
+        )
 
     override suspend fun removeById(id: Long) {
         postDao.removeById(id)
@@ -127,117 +152,6 @@ class PostRepositoryImpl(private val postDao: PostDao) : PostRepository {
     }
 }
 
-
-/*override fun likeByIdAsync(
-    id: Long,
-    likedByMe: Boolean,
-    callback: PostRepository.LikeCallback
-) {
-    val call = if (likedByMe) PostApi.service.dislikeById(id) else PostApi.service.likeById(id)
-
-    call.enqueue(
-        object : Callback<Post> {
-            override fun onResponse(call: Call<Post>, response: Response<Post>) {
-                try {
-                    callback.onSuccess(response.requireBody())
-                } catch (e: Exception) {
-                    callback.onError(e)
-                }
-            }
-
-            override fun onFailure(call: Call<Post>, t: Throwable) {
-                callback.onError(
-                    if (t is java.io.IOException)
-                        NetworkError()
-                    else
-                        UnknownError(t)
-                )
-            }
-        })
-}
-
-
-override fun saveAsync(
-    post: Post,
-    callback: PostRepository.SaveCallback
-) {
-    PostApi.service.save(post).enqueue(object : Callback<Post> {
-        override fun onResponse(
-            call: Call<Post>,
-            response: Response<Post>
-        ) {
-            if (response.isSuccessful) callback.onSuccess()
-            else {
-                val msg = response.errorBody()?.string().orEmpty()
-                    .ifBlank { response.message() }
-                callback.onError(ApiError(response.code(), msg))
-            }
-        }
-
-        override fun onFailure(call: Call<Post>, t: Throwable) {
-            callback.onError(
-                if (t is java.io.IOException)
-                    NetworkError()
-                else
-                    UnknownError(t)
-            )
-        }
-    })
-}
-
-override fun removeByIdAsync(
-    id: Long,
-    callback: PostRepository.RemoveCallback
-) {
-    PostApi.service.removeById(id).enqueue(object : Callback<Unit> {
-        override fun onResponse(
-            call: Call<Unit>,
-            response: Response<Unit>
-        ) {
-            if (response.isSuccessful) callback.onSuccess()
-            else {
-                val msg = response.errorBody()?.string().orEmpty()
-                    .ifBlank { response.message() }
-                callback.onError(ApiError(response.code(), msg))
-            }
-        }
-
-        override fun onFailure(call: Call<Unit>, t: Throwable) {
-            callback.onError(
-                if (t is java.io.IOException)
-                    NetworkError()
-                else
-                    UnknownError(t)
-            )
-        }
-    })
-}
-
-
-override fun getAllAsync(callback: PostRepository.GetAllCallback) {
-    PostApi.service.getAll()
-        .enqueue(object : Callback<List<Post>> {
-            override fun onResponse(
-                call: Call<List<Post>>,
-                response: Response<List<Post>>
-            ) {
-                try {
-                    callback.onSuccess(response.requireBody())
-                } catch (e: Exception) {
-                    callback.onError(e)
-                }
-            }
-
-            override fun onFailure(call: Call<List<Post>>, t: Throwable) {
-                callback.onError(
-                    if (t is java.io.IOException)
-                        NetworkError()
-                    else
-                        UnknownError(t)
-                )
-            }
-        })
-}*/
 
 
 

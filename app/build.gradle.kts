@@ -75,4 +75,6 @@ dependencies {
     implementation(libs.converter.gson)
     implementation(libs.logging.interceptor)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.imagepicker)
+    implementation(libs.ucrop)
 }

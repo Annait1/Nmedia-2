@@ -1,6 +1,7 @@
 package ru.netology.nmedia.viewmodel
 
 import android.app.Application
+import android.net.Uri
 import androidx.lifecycle.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
@@ -13,8 +14,10 @@ import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.model.FeedModelState
+import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.repository.*
 import ru.netology.nmedia.util.SingleLiveEvent
+import java.io.File
 import java.io.IOException
 import kotlin.concurrent.thread
 
@@ -60,6 +63,10 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     val postCreated: LiveData<Unit>
         get() = _postCreated
 
+    private val _photo = MutableLiveData<PhotoModel?>(null)
+    val photo: LiveData<PhotoModel?>
+        get() = _photo
+
 
     init {
         loadPosts()
@@ -95,16 +102,8 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     fun save() {
         viewModelScope.launch {
             _state.value = try {
-                edited.value?.let { post ->
-                    val toSend = post.copy(
-                        author = "",
-                        published = 0L,
-                        likes = 0,
-                        likedByMe = false,
-                        attachment = null,
-                        authorAvatar = null
-                    )
-                    repository.save(post)
+                edited.value?.let {
+                    repository.save(it, _photo.value?.file)
                     _postCreated.value = Unit
                 }
                 FeedModelState()
@@ -161,6 +160,14 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         is UnknownError -> R.string.error_unknown
         else -> R.string.error_unknown
 
+    }
+
+    fun changePhoto(uri: Uri, file: File) {
+        _photo.value = PhotoModel(uri, file)
+    }
+
+    fun removePhoto() {
+        _photo.value = null
     }
 
 

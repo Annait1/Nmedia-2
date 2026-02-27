@@ -19,6 +19,7 @@ interface OnInteractionListener {
     fun onEdit(post: Post) {}
     fun onRemove(post: Post) {}
     fun onShare(post: Post) {}
+    fun onImage(post: Post) {}
 }
 
 class PostsAdapter(
@@ -49,17 +50,6 @@ class PostViewHolder(
             like.isChecked = post.likedByMe
             like.text = "${post.likes}"
 
-            /*   val baseUrl = "http://10.0.2.2:9999"*/
-            /*   val avatarUrl = */
-
-
-            /*  Glide.with(avatar)
-                  .load(avatarUrl)
-
-                  .into(avatar)
-
-              println("avatarUrl=$avatarUrl")*/
-
             val url = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
 
             Glide.with(avatar)
@@ -71,14 +61,11 @@ class PostViewHolder(
                 .into(avatar)
 
 
-
-
-
             if (post.attachment != null && post.attachment.type == AttachmentType.IMAGE) {
 
                 attachmentImage.visibility = View.VISIBLE
 
-                val url = "http://10.0.2.2:9999/images/${post.attachment.url}"
+                val url = "http://10.0.2.2:9999/media/${post.attachment.url}"
 
                 Glide.with(attachmentImage)
                     .load(url)
@@ -86,6 +73,13 @@ class PostViewHolder(
                     .error(R.drawable.ic_error)
                     .timeout(10_000)
                     .into(attachmentImage)
+
+
+
+                attachmentImage.setOnClickListener {
+                    onInteractionListener.onImage(post)
+                }
+
 
             } else {
                 attachmentImage.visibility = View.GONE
