@@ -1,5 +1,6 @@
 package ru.netology.nmedia.api
 
+import android.util.Log
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -8,6 +9,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.DELETE
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
@@ -16,20 +19,28 @@ import retrofit2.http.Path
 import ru.netology.nmedia.dto.Post
 import java.util.concurrent.TimeUnit
 import ru.netology.nmedia.BuildConfig
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dto.Media
+import ru.netology.nmedia.dto.Token
 
 private const val BASE_URL = "${BuildConfig.BASE_URL}/api/slow/"
 
+private val logging = HttpLoggingInterceptor().apply {
+    if (BuildConfig.DEBUG) {
+        level = HttpLoggingInterceptor.Level.BODY
+    }
+}
 private val client = OkHttpClient.Builder()
-    .connectTimeout(30, TimeUnit.SECONDS)
-    .run {
-        if (BuildConfig.DEBUG) {
-            addInterceptor(HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BODY
-            })
-        } else {
-            this
+    .addInterceptor(logging)
+
+    .addInterceptor { chain ->
+        AppAuth.getInstance().authStateFlow.value.token?.let { token ->
+            val newRequest = chain.request().newBuilder()
+                .addHeader("Authorization", "Bearer $token")
+                .build()
+            return@addInterceptor chain.proceed(newRequest)
         }
+        chain.proceed(chain.request())
     }
     .build()
 
@@ -65,9 +76,35 @@ interface PostApiService {
 
 }
 
+
 object PostApi {
     val service: PostApiService by lazy {
         retrofit.create(PostApiService::class.java)
+    }
+}
+
+
+private const val BASE_AUTH_URL = BuildConfig.BASE_URL
+
+
+private val authRetrofit = Retrofit.Builder()
+    .baseUrl(BASE_AUTH_URL)
+    .client(client)
+    .addConverterFactory(GsonConverterFactory.create())
+    .build()
+interface UsersApi {
+
+    @FormUrlEncoded
+    @POST("api/users/authentication")
+    suspend fun authenticate(
+        @Field("login") login: String,
+        @Field("pass") pass: String,
+    ): Token
+}
+
+object UsersApiService {
+    val service: UsersApi by lazy {
+        authRetrofit.create(UsersApi::class.java)
     }
 }
 

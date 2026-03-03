@@ -5,9 +5,14 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.MenuProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.findNavController
@@ -16,9 +21,14 @@ import com.google.android.gms.common.GoogleApiAvailability
 import com.google.firebase.messaging.FirebaseMessaging
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.databinding.ActivityAppBinding
+import ru.netology.nmedia.viewmodel.AuthViewModel
+import androidx.lifecycle.lifecycleScope
 
 class AppActivity : AppCompatActivity() {
+
+    private val authViewModel: AuthViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +42,12 @@ class AppActivity : AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
+        }
+
+        lifecycleScope.launchWhenStarted {
+            AppAuth.getInstance().authStateFlow.collect {
+                invalidateOptionsMenu()
+            }
         }
 
         intent?.let {
@@ -55,6 +71,51 @@ class AppActivity : AppCompatActivity() {
         }
 
         checkGoogleApiAvailability()
+
+
+
+
+
+
+
+
+        addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menuInflater.inflate(R.menu.menu__auth, menu)
+
+            }
+            override fun onPrepareMenu(menu: Menu) {
+                menu.setGroupVisible(R.id.unauthenticated, !authViewModel.authenticated)
+                menu.setGroupVisible(R.id.authenticated, authViewModel.authenticated)
+            }
+
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean =
+                when (menuItem.itemId) {
+                    R.id.signin -> {
+                        findNavController(R.id.nav_host_fragment)
+                            .navigate(R.id.action_feedFragment_to_fragmentSignIn)
+                        true
+                    }
+
+                    R.id.signup -> {
+                        // TODO: just hardcode it, implementation must be in homework
+                        AppAuth.getInstance().setAuth(5, "x-token")
+                        true
+                    }
+
+                    R.id.logout -> {
+                        // TODO: just hardcode it, implementation must be in homework
+                        AppAuth.getInstance().removeAuth()
+                        true
+                    }
+
+                    else -> false
+                }
+        })
+
+
+
+
     }
 
     private fun requestNotificationsPermission() {

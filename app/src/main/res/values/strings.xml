@@ -26,6 +26,13 @@
     <string name="show_new">Show_new</string>
     <string name="imagepickererror">ImagePickerError</string>
     <string name="image">Image attachment</string>
+    <string name="sign_in">Sign in</string>
+    <string name="sign_up">Sign up</string>
+    <string name="logout">Logout</string>
+    <string name="login">Login</string>
+    <string name="password">Password</string>
+    <string name="sign_in_button">Войти</string>
+    <string name="auth_error">Неверный логин или пароль</string>
 
 
     <plurals name="new_posts">

@@ -24,6 +24,13 @@
             app:exitAnim="@android:anim/fade_out"
             app:popEnterAnim="@android:anim/fade_in"
             app:popExitAnim="@android:anim/fade_out" />
+        <action
+            android:id="@+id/action_feedFragment_to_fragmentSignIn"
+            app:destination="@id/fragmentSignIn"
+            app:enterAnim="@android:anim/fade_in"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@android:anim/fade_out" />
     </fragment>
     <fragment
         android:id="@+id/newPostFragment"
@@ -36,4 +43,10 @@
         android:name="ru.netology.nmedia.activity.ImageFragment"
         android:label="fragment_image"
         tools:layout="@layout/fragment_image" />
+
+    <fragment
+        android:id="@+id/fragmentSignIn"
+        android:name="ru.netology.nmedia.activity.FragmentSignIn"
+        android:label="@string/sign_in"
+        tools:layout="@layout/fragment_sign_in" />
 </navigation>
