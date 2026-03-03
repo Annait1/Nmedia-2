@@ -46,7 +46,6 @@ class PostViewHolder(
             author.text = post.author
             published.text = formatRelativeTime(post.published)
             content.text = post.content
-            // в адаптере
             like.isChecked = post.likedByMe
             like.text = "${post.likes}"
 
@@ -86,7 +85,8 @@ class PostViewHolder(
                 Glide.with(attachmentImage).clear(attachmentImage)
             }
 
-
+            menu.visibility = if (post.ownedByMe) View.VISIBLE else View.GONE
+            menu.isEnabled = post.ownedByMe
 
             menu.setOnClickListener {
                 PopupMenu(it.context, it).apply {

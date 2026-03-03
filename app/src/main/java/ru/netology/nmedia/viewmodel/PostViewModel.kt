@@ -20,8 +20,6 @@ import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.repository.*
 import ru.netology.nmedia.util.SingleLiveEvent
 import java.io.File
-import java.io.IOException
-import kotlin.concurrent.thread
 
 
 private val empty = Post(
@@ -35,14 +33,13 @@ private val empty = Post(
     authorAvatar = "",
     authorId = 0,
 
-)
+    )
 
 class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository: PostRepository = PostRepositoryImpl(
         AppDb.getInstance(context = application).postDao()
     )
-
 
 
     val data: LiveData<FeedModel> = AppAuth.getInstance()
@@ -56,11 +53,6 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                     )
                 }
         }.asLiveData(Dispatchers.Default)
-
-
-
-
-
 
 
     val newerCount: LiveData<Int> =
@@ -165,6 +157,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         }
 
     }
+
     fun showNewPosts() = viewModelScope.launch {
         repository.showNewPosts()
     }
