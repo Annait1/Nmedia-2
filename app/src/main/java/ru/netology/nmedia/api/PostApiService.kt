@@ -19,6 +19,7 @@ import ru.netology.nmedia.BuildConfig
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.dto.PushToken
 import ru.netology.nmedia.dto.Token
 
 private const val BASE_URL = "${BuildConfig.BASE_URL}/api/slow/"
@@ -72,6 +73,11 @@ interface PostApiService {
     @Multipart
     @POST("media")
     suspend fun upload(@Part file: MultipartBody.Part): Media
+
+    @POST("users/push-tokens")
+    suspend fun sendPushToken (@Body pushToken: PushToken): Response<Unit>
+
+
 
 }
 
