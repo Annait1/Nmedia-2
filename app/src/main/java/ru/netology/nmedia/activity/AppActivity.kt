@@ -21,14 +21,26 @@ import com.google.android.gms.common.GoogleApiAvailability
 import com.google.firebase.messaging.FirebaseMessaging
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
-import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.databinding.ActivityAppBinding
 import ru.netology.nmedia.viewmodel.AuthViewModel
 import androidx.lifecycle.lifecycleScope
+import dagger.hilt.android.AndroidEntryPoint
+import ru.netology.nmedia.auth.AppAuth
+import javax.inject.Inject
 
+
+@AndroidEntryPoint
 class AppActivity : AppCompatActivity() {
 
+    @Inject
+    lateinit var appAuth: AppAuth
+    @Inject
+    lateinit var googleApiAvailability: GoogleApiAvailability
+    @Inject
+    lateinit var firebaseMessaging: FirebaseMessaging
+
     private val authViewModel: AuthViewModel by viewModels()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,7 +57,7 @@ class AppActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launchWhenStarted {
-            AppAuth.getInstance().authStateFlow.collect {
+          appAuth.authStateFlow.collect {
                 invalidateOptionsMenu()
             }
         }
@@ -73,12 +85,6 @@ class AppActivity : AppCompatActivity() {
         checkGoogleApiAvailability()
 
 
-
-
-
-
-
-
         addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.menu__auth, menu)
@@ -99,23 +105,19 @@ class AppActivity : AppCompatActivity() {
 
                     R.id.signup -> {
                         // TODO: just hardcode it, implementation must be in homework
-                        AppAuth.getInstance().setAuth(5, "x-token")
+                       appAuth.setAuth(5, "x-token")
                         true
                     }
 
                     R.id.logout -> {
                         // TODO: just hardcode it, implementation must be in homework
-                        AppAuth.getInstance().removeAuth()
+                       appAuth.removeAuth()
                         true
                     }
 
                     else -> false
                 }
         })
-
-
-
-
     }
 
     private fun requestNotificationsPermission() {
@@ -133,7 +135,7 @@ class AppActivity : AppCompatActivity() {
     }
 
     private fun checkGoogleApiAvailability() {
-        with(GoogleApiAvailability.getInstance()) {
+        with(googleApiAvailability){
             val code = isGooglePlayServicesAvailable(this@AppActivity)
             if (code == ConnectionResult.SUCCESS) {
                 return@with
@@ -146,7 +148,7 @@ class AppActivity : AppCompatActivity() {
                 .show()
         }
 
-        FirebaseMessaging.getInstance().token.addOnSuccessListener {
+        firebaseMessaging.token.addOnSuccessListener {
             println(it)
         }
     }

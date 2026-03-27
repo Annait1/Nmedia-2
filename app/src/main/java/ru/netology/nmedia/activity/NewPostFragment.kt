@@ -21,8 +21,11 @@ import ru.netology.nmedia.util.AndroidUtils
 import ru.netology.nmedia.util.StringArg
 import ru.netology.nmedia.viewmodel.PostViewModel
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
 
+
+@AndroidEntryPoint
 class NewPostFragment : Fragment() {
 
     companion object {
@@ -117,11 +120,6 @@ class NewPostFragment : Fragment() {
                 .maxResultSize(width = MAX_SIXE_PX, height = MAX_SIXE_PX)
                 .createIntent(imagePickerLauncher::launch)
         }
-
-
-
-
-
 
 
 

@@ -1,12 +1,18 @@
 package ru.netology.nmedia.viewmodel
 import androidx.lifecycle.*
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import ru.netology.nmedia.api.UsersApiService
+import ru.netology.nmedia.api.UsersApi
+
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dto.Token
+import javax.inject.Inject
 
-
-class SignInViewModel : ViewModel() {
+@HiltViewModel
+class SignInViewModel @Inject constructor(
+    private val usersApi: UsersApi,
+    private val appAuth: AppAuth,
+): ViewModel() {
 
     private val _state = MutableLiveData(SignInState())
     val state: LiveData<SignInState> = _state
@@ -19,9 +25,9 @@ class SignInViewModel : ViewModel() {
             _state.value = SignInState(loading = true)
 
             val token: Token =
-                UsersApiService.service.authenticate(login, pass)
+                usersApi.authenticate(login, pass)
 
-            AppAuth.getInstance().setAuth(token.id, token.token)
+            appAuth.setAuth(token.id, token.token)
 
             _state.value = SignInState()
             _success.value = Unit

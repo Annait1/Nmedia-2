@@ -1,16 +1,18 @@
 package ru.netology.nmedia.viewmodel
 
-import android.app.Application
+
 import android.net.Uri
 import androidx.lifecycle.*
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.R
 import ru.netology.nmedia.auth.AppAuth
-import ru.netology.nmedia.db.AppDb
+
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.NetworkError
@@ -20,6 +22,9 @@ import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.repository.*
 import ru.netology.nmedia.util.SingleLiveEvent
 import java.io.File
+import javax.inject.Inject
+import ru.netology.nmedia.error.UnknownError
+
 
 
 private val empty = Post(
@@ -34,15 +39,20 @@ private val empty = Post(
     authorId = 0,
 
     )
+@OptIn(ExperimentalCoroutinesApi::class)
+@HiltViewModel
 
-class PostViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val repository: PostRepository = PostRepositoryImpl(
-        AppDb.getInstance(context = application).postDao()
-    )
+class PostViewModel @Inject constructor(
+    private val repository: PostRepository,
+    appAuth: AppAuth,
 
 
-    val data: LiveData<FeedModel> = AppAuth.getInstance()
+    ) : ViewModel() {
+
+
+
+
+    val data: LiveData<FeedModel> = appAuth
         .authStateFlow
         .flatMapLatest { (myId, _) ->
             repository.data

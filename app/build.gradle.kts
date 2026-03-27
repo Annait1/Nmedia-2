@@ -5,6 +5,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.ksp)
     alias(libs.plugins.google.services)
+    alias(libs.plugins.hilt)
+
 }
 
 android {
@@ -77,4 +79,7 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     implementation(libs.imagepicker)
     implementation(libs.ucrop)
+    implementation(libs.hilt.android)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
 }
