@@ -1,6 +1,9 @@
 package ru.netology.nmedia.repository
 
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -29,9 +32,15 @@ class PostRepositoryImpl @Inject constructor(
     private val apiService: PostApiService
 ) : PostRepository {
 
-    override val data = postDao.getShown()
-        .map { it.map { it.toDto() } }
-
+    override val data = Pager(
+        config = PagingConfig(pageSize = 10, enablePlaceholders = false),
+        pagingSourceFactory =
+            {
+                PostPagingSource(
+                    apiService
+                )
+            }
+    ).flow
 
 
     override suspend fun getAll() {
@@ -84,7 +93,7 @@ class PostRepositoryImpl @Inject constructor(
 
             val postWithAttachment = media?.let {
                 post.copy(attachment = Attachment(url = it.id, AttachmentType.IMAGE))
-            }?: post
+            } ?: post
 
 
             val response = apiService.save(postWithAttachment)

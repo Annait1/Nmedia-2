@@ -80,6 +80,6 @@ dependencies {
     implementation(libs.imagepicker)
     implementation(libs.ucrop)
     implementation(libs.hilt.android)
-    implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+    implementation(libs.androidx.paging.runtime.ktx)
 }

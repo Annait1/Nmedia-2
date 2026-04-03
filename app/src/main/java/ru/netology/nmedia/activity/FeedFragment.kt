@@ -9,10 +9,13 @@ import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
@@ -71,13 +74,23 @@ class FeedFragment : Fragment() {
         })
 
 
-        binding.list.adapter = adapter
-        viewModel.data.observe(viewLifecycleOwner) { state ->
-            adapter.submitList(state.posts)
-
-            binding.emptyText.isVisible = state.empty
-            binding.resresh.isRefreshing = false
+        lifecycleScope.launchWhenCreated {
+            viewModel.data.collectLatest {
+                adapter.submitData(it)
+            }
         }
+        lifecycleScope.launchWhenCreated {
+            adapter.loadStateFlow.collectLatest {
+                binding.refresh.isRefreshing = it.refresh is LoadState.Loading
+                        || it.append is LoadState.Loading
+                        || it.prepend is LoadState.Loading
+            }
+        }
+
+        binding.refresh.setOnRefreshListener {
+            adapter.refresh()
+        }
+
 
         binding.newPostsCard.setOnClickListener {
             binding.newPostsCard.isVisible = false
@@ -88,7 +101,7 @@ class FeedFragment : Fragment() {
         viewModel.state.observe(viewLifecycleOwner) { state ->
             binding.progress.isVisible = state.loading
             /*  binding.errorGroup.isVisible = state.error уже не надо*/
-            binding.resresh.isRefreshing = state.refreshing
+            binding.refresh.isRefreshing = state.refreshing
 
             if (state.error) {
                 Snackbar.make(
@@ -112,9 +125,6 @@ class FeedFragment : Fragment() {
             }
         }
 
-        binding.resresh.setOnRefreshListener {
-            viewModel.refreshPosts()
-        }
 
         binding.fab.setOnClickListener {
             findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
