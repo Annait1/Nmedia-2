@@ -86,37 +86,6 @@ class PostViewModel @Inject constructor(
         get() = _photo
 
 
-    init {
-        loadPosts()
-    }
-
-
-    fun loadPosts() {
-        viewModelScope.launch {
-            _state.value = FeedModelState(loading = true)
-            _state.value = try {
-                repository.getAll()
-                FeedModelState()
-            } catch (e: Exception) {
-                FeedModelState(error = true, errorMessage = errorMessage(e))
-            }
-
-        }
-    }
-
-    fun refreshPosts() {
-        viewModelScope.launch {
-            _state.value = FeedModelState(refreshing = true)
-            _state.value = try {
-                repository.getAll()
-                FeedModelState()
-            } catch (e: Exception) {
-                FeedModelState(error = true, errorMessage = errorMessage(e))
-            }
-
-        }
-    }
-
     fun save() {
         viewModelScope.launch {
             _state.value = try {
@@ -169,9 +138,7 @@ class PostViewModel @Inject constructor(
 
     }
 
-    fun showNewPosts() = viewModelScope.launch {
-        repository.showNewPosts()
-    }
+
 
     private fun errorMessage(e: Throwable): Int = when (e) {
         is NetworkError -> R.string.error_network

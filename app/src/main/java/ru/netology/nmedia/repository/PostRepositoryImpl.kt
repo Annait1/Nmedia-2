@@ -43,23 +43,6 @@ class PostRepositoryImpl @Inject constructor(
     ).flow
 
 
-    override suspend fun getAll() {
-        try {
-            val response = apiService.getAll()
-
-            if (!response.isSuccessful) {
-                throw ApiError(response.code(), response.message())
-            }
-
-            val posts: List<Post> = response.body()
-                ?: throw ApiError(response.code(), "Response body is empty")
-
-            postDao.insert(posts.map { PostEntity.fromDto(it, shown = true) })
-        } catch (e: Exception) {
-            throw AppError.from(e)
-        }
-    }
-
     override suspend fun likeById(
         id: Long,
         likedByMe: Boolean
@@ -142,24 +125,21 @@ class PostRepositoryImpl @Inject constructor(
             val maxId = postDao.getMaxIdOnce()
 
 
-            val response = apiService.getNewer(maxId)
+            val response = apiService.getNewerCount(maxId)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
 
-            val body = response.body() ?: throw ApiError(response.code(), response.message())
+            val count = response.body()
+                ?: throw ApiError(response.code(), "Response body is empty")
 
-            postDao.insert(body.map { PostEntity.fromDto(it, shown = false) })
-            val hiddenCount = postDao.countHidden().first()
-            emit(hiddenCount)
+            emit(count)
         }
     }
         .catch { e -> throw AppError.from(e) }
         .flowOn(Dispatchers.Default)
 
-    override suspend fun showNewPosts() {
-        postDao.showAll()
-    }
+
 }
 
 

@@ -73,6 +73,8 @@ class FeedFragment : Fragment() {
             }
         })
 
+        binding.list.adapter = adapter
+
 
         lifecycleScope.launchWhenCreated {
             viewModel.data.collectLatest {
@@ -94,14 +96,12 @@ class FeedFragment : Fragment() {
 
         binding.newPostsCard.setOnClickListener {
             binding.newPostsCard.isVisible = false
-            viewModel.showNewPosts()
+           adapter.refresh()
             binding.list.smoothScrollToPosition(0)
         }
 
         viewModel.state.observe(viewLifecycleOwner) { state ->
-            binding.progress.isVisible = state.loading
-            /*  binding.errorGroup.isVisible = state.error уже не надо*/
-            binding.refresh.isRefreshing = state.refreshing
+
 
             if (state.error) {
                 Snackbar.make(
@@ -109,7 +109,7 @@ class FeedFragment : Fragment() {
                     state.errorMessage ?: R.string.error_loading,
                     Snackbar.LENGTH_LONG
                 )
-                    .setAction(R.string.retry_loading) { viewModel.loadPosts() }
+                    .setAction(R.string.retry_loading) { adapter.refresh() }
                     .show()
             }
 
