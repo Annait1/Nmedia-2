@@ -10,6 +10,7 @@ import dagger.hilt.components.SingletonComponent
 import retrofit2.Retrofit
 import ru.netology.nmedia.api.UsersApi
 import ru.netology.nmedia.dao.PostDao
+import ru.netology.nmedia.dao.PostRemoteKeyDao
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -19,7 +20,7 @@ class DbModule {
 
     @Singleton
     @Provides
-    fun provadeDb(
+    fun provideDb(
         @ApplicationContext
         context: Context
     ): AppDb = Room.databaseBuilder(context, AppDb::class.java, "app.db")
@@ -38,4 +39,7 @@ class DbModule {
         @Named("authRetrofit")
         retrofit: Retrofit
     ): UsersApi = retrofit.create(UsersApi::class.java)
+
+    @Provides
+    fun providePostRemoteKeyDao(db: AppDb): PostRemoteKeyDao = db.postRemoteKeyDao()
 }

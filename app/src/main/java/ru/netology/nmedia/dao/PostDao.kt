@@ -1,5 +1,6 @@
 package ru.netology.nmedia.dao
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -11,6 +12,9 @@ import ru.netology.nmedia.entity.PostEntity
 interface PostDao {
     @Query("SELECT * FROM PostEntity ORDER BY id DESC")
     fun getAll(): Flow<List<PostEntity>>
+
+    @Query("SELECT * FROM PostEntity ORDER BY id DESC")
+    fun pagingSource(): PagingSource<Int, PostEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(post: PostEntity)
@@ -48,4 +52,10 @@ interface PostDao {
 
     @Query("SELECT COALESCE(MAX(id), 0) FROM PostEntity")
     suspend fun getMaxIdOnce(): Long
+
+    @Query("SELECT MIN(id) FROM PostEntity")
+    suspend fun getMinIdOnce(): Long?
+
+   /* @Query("DELETE FROM PostEntity")
+    suspend fun removeAll()*/
 }
