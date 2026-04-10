@@ -18,6 +18,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.OnInteractionListener
+import ru.netology.nmedia.adapter.PagingLoadStateAdapter
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
@@ -73,7 +74,10 @@ class FeedFragment : Fragment() {
             }
         })
 
-        binding.list.adapter = adapter
+        binding.list.adapter = adapter.withLoadStateHeaderAndFooter(
+            header = PagingLoadStateAdapter { adapter.retry() },
+            footer = PagingLoadStateAdapter { adapter.retry() },
+        )
 
 
         lifecycleScope.launchWhenCreated {
@@ -84,8 +88,7 @@ class FeedFragment : Fragment() {
         lifecycleScope.launchWhenCreated {
             adapter.loadStateFlow.collectLatest {
                 binding.refresh.isRefreshing = it.refresh is LoadState.Loading
-                        || it.append is LoadState.Loading
-                        || it.prepend is LoadState.Loading
+
             }
         }
 
@@ -96,7 +99,7 @@ class FeedFragment : Fragment() {
 
         binding.newPostsCard.setOnClickListener {
             binding.newPostsCard.isVisible = false
-           adapter.refresh()
+            adapter.refresh()
             binding.list.smoothScrollToPosition(0)
         }
 

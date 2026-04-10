@@ -34,6 +34,7 @@
     <string name="password">ПАроль</string>
     <string name="sign_in_button">Войти</string>
     <string name="auth_error">Неверный логин или пароль</string>
+    <string name="ad_description">Реклама</string>
 
 
     <plurals name="new_posts">

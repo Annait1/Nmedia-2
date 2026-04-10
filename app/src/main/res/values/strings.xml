@@ -33,6 +33,7 @@
     <string name="password">Password</string>
     <string name="sign_in_button">Войти</string>
     <string name="auth_error">Неверный логин или пароль</string>
+    <string name="ad_description">ad</string>
 
 
     <plurals name="new_posts">

@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import ru.netology.nmedia.R
 import ru.netology.nmedia.auth.AppAuth
 import kotlinx.coroutines.flow.*
+import ru.netology.nmedia.dto.FeedItem
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.NetworkError
@@ -27,7 +28,6 @@ import ru.netology.nmedia.util.SingleLiveEvent
 import java.io.File
 import javax.inject.Inject
 import ru.netology.nmedia.error.UnknownError
-
 
 
 private val empty = Post(
@@ -42,6 +42,7 @@ private val empty = Post(
     authorId = 0,
 
     )
+
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 
@@ -53,17 +54,19 @@ class PostViewModel @Inject constructor(
     ) : ViewModel() {
 
 
-
-    val data: Flow<PagingData<Post>> = appAuth.authStateFlow
+    val data: Flow<PagingData<FeedItem>> = appAuth.authStateFlow
         .flatMapLatest { (myId, _) ->
             repository.data.map { pagingData ->
                 pagingData.map { post ->
-                    post.copy(ownedByMe = post.authorId == myId)
+                    if (post is Post) {
+                        post.copy(ownedByMe = post.authorId == myId)
+                    } else {
+                        post
+                    }
                 }
             }
         }
         .cachedIn(viewModelScope)
-
 
 
     val newerCount: LiveData<Int> =
@@ -137,7 +140,6 @@ class PostViewModel @Inject constructor(
         }
 
     }
-
 
 
     private fun errorMessage(e: Throwable): Int = when (e) {

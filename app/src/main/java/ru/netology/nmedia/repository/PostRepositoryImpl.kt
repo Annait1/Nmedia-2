@@ -4,6 +4,8 @@ package ru.netology.nmedia.repository
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.insertSeparators
 import androidx.paging.map
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -18,15 +20,19 @@ import ru.netology.nmedia.api.PostApiService
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.dao.PostRemoteKeyDao
 import ru.netology.nmedia.db.AppDb
+import ru.netology.nmedia.dto.Ad
 import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.dto.AttachmentType
+import ru.netology.nmedia.dto.FeedItem
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.AppError
 import java.io.File
+import java.time.temporal.TemporalAdjusters.previous
 import javax.inject.Inject
+import kotlin.random.Random
 
 
 class PostRepositoryImpl @Inject constructor(
@@ -37,7 +43,7 @@ class PostRepositoryImpl @Inject constructor(
 ) : PostRepository {
 
     @OptIn(ExperimentalPagingApi::class)
-    override val data = Pager(
+    override val data: Flow<PagingData<FeedItem>> = Pager(
         config = PagingConfig(pageSize = 10, enablePlaceholders = false),
         pagingSourceFactory = { postDao.pagingSource() },
         remoteMediator = PostRemoteMediator(
@@ -46,9 +52,15 @@ class PostRepositoryImpl @Inject constructor(
             postRemoteKeyDao = postRemoteKeyDao,
             appDb = appDb
         )
-    ).flow
-        .map {
-            it.map(PostEntity::toDto)
+    ).flow.map {pagingData ->
+            pagingData.map(PostEntity::toDto)
+                .insertSeparators {previous, _ ->
+                    if (previous?.id?.rem(5) ==0L) {
+                        Ad(Random.nextLong(), "figma.jpg")
+                    }else {
+                        null
+                }
+                }
         }
 
 
